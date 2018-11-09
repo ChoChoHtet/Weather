@@ -1,4 +1,4 @@
-package com.android.ict.weather.model;
+package com.android.ict.weather.Model;
 
 public class Wind {
     private float speed;

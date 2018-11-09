@@ -1,21 +1,28 @@
 package com.android.ict.weather;
 
+import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.ict.weather.Activities.CityActivity;
 import com.android.ict.weather.Adapter.WeatherAdapter;
+import com.android.ict.weather.Model.ConditionList;
+import com.android.ict.weather.Model.MainWeather;
 import com.android.ict.weather.Retrofit.APIService;
 import com.android.ict.weather.Util.Common;
-import com.android.ict.weather.model.ConditionList;
-import com.android.ict.weather.model.Main;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
@@ -27,31 +34,84 @@ public class MainActivity extends AppCompatActivity {
     private WeatherAdapter adapter;
     private CompositeDisposable compositeDisposable=new CompositeDisposable();
     private APIService mService;
+    private List<ConditionList> conList;
+    private LinearLayout linearLayout;
+    private ProgressBar progressBar;
+    @BindView(R.id.btn_city)Button btnCity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mService= Common.getAPI();
-
         list=findViewById(R.id.weather_list);
+        linearLayout=findViewById(R.id.linear_layout);
+        progressBar=findViewById(R.id.progressbar);
+        progressBar.setVisibility(View.VISIBLE);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setHasFixedSize(true);
-        data();
+        adapter=new WeatherAdapter(this);
+        ButterKnife.bind(this);
+
+        mService= Common.getAPI();
+        if(!Connection.checkConnection(this)){
+            Snackbar snackbar=Snackbar.make(linearLayout,"No Internet Connection!",Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Try Again", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(Connection.checkConnection(v.getContext())){
+                                data();
+                            }else{
+                                tryAgain();
+                            }
+                        }
+                    });
+            snackbar.show();
+
+        }else {
+            data();
+            btnCity.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.getContext().startActivity(new Intent(v.getContext(), CityActivity.class));
+
+                }
+            });
+        }
+
+
+
+
+
+       // list.setAdapter(adapter);
+
     }
 
     private void data() {
        compositeDisposable.add(mService.getConditionList()
        .observeOn(AndroidSchedulers.mainThread())
        .subscribeOn(Schedulers.io())
-       .subscribe(new Consumer<Main>() {
+       .subscribe(new Consumer<MainWeather>() {
            @Override
-           public void accept(Main main) throws Exception {
-               adapter=new WeatherAdapter(getApplicationContext(),main.getList());
+           public void accept(MainWeather mainWeather) throws Exception {
+               progressBar.setVisibility(View.GONE);
+               adapter.addList(mainWeather.getList());
+               adapter.notifyDataSetChanged();
                list.setAdapter(adapter);
 
            }
        }));
+    }
+    private void tryAgain(){
+        Snackbar snackbar=Snackbar.make(linearLayout,"No Internet Connection!",Snackbar.LENGTH_INDEFINITE)
+                .setAction("Try Again", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(Connection.checkConnection(v.getContext())){
+                            data();
+                        }
+                    }
+                });
+        snackbar.show();
     }
 
 

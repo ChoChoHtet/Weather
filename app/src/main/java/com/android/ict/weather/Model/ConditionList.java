@@ -1,4 +1,4 @@
-package com.android.ict.weather.model;
+package com.android.ict.weather.Model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

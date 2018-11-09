@@ -1,4 +1,4 @@
-package com.android.ict.weather.model;
+package com.android.ict.weather.Model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -26,9 +26,6 @@ public class CurrentLocation {
     @SerializedName("humidity")
     @Expose
     private Integer humidity;
-   /* @SerializedName("temp_kf")
-    @Expose
-    private Integer tempKf;*/
 
     public Double getTemp() {
         return temp;
@@ -86,11 +83,4 @@ public class CurrentLocation {
         this.humidity = humidity;
     }
 
-  /*  public Integer getTempKf() {
-        return tempKf;
-    }
-
-    public void setTempKf(Integer tempKf) {
-        this.tempKf = tempKf;
-    }*/
 }

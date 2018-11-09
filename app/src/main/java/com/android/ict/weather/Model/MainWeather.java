@@ -1,11 +1,11 @@
-package com.android.ict.weather.model;
+package com.android.ict.weather.Model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Main {
+public class MainWeather {
     @SerializedName("cod")
     @Expose
     private String cod;
@@ -49,6 +49,5 @@ public class Main {
     public void setList(List<ConditionList> list) {
         this.list = list;
     }
-
 
 }
