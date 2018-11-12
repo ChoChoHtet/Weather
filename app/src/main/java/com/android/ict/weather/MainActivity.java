@@ -29,14 +29,12 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
-
-    private RecyclerView list;
+    @BindView(R.id.weather_list)RecyclerView list;
+    @BindView(R.id.progressbar)ProgressBar progressBar;
     private WeatherAdapter adapter;
     private CompositeDisposable compositeDisposable=new CompositeDisposable();
     private APIService mService;
-    private List<ConditionList> conList;
     private LinearLayout linearLayout;
-    private ProgressBar progressBar;
     @BindView(R.id.btn_city)Button btnCity;
 
     @Override
@@ -114,5 +112,13 @@ public class MainActivity extends AppCompatActivity {
         snackbar.show();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(compositeDisposable!=null && !compositeDisposable.isDisposed()){
+            compositeDisposable.dispose();
+            compositeDisposable.clear();
+        }
 
+    }
 }
