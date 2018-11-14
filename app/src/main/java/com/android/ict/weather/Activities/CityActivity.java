@@ -1,5 +1,6 @@
 package com.android.ict.weather.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +15,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.ict.weather.Adapter.WeatherAdapter;
+import com.android.ict.weather.Adapter.WeatherAdapter1;
+import com.android.ict.weather.BaseHolder.BaseViewHolder;
 import com.android.ict.weather.Connection;
+import com.android.ict.weather.Model.ConditionList;
 import com.android.ict.weather.Model.MainWeather;
 import com.android.ict.weather.R;
 import com.android.ict.weather.Retrofit.APIService;
@@ -29,7 +33,7 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.http.GET;
 
-public class CityActivity extends AppCompatActivity {
+public class CityActivity extends AppCompatActivity implements BaseViewHolder.onClick {
     @BindView(R.id.ed_city)
     EditText edCity;
     @BindView(R.id.btn_ok)
@@ -42,7 +46,7 @@ public class CityActivity extends AppCompatActivity {
 
     private APIService cityService;
     private CompositeDisposable disposable = new CompositeDisposable();
-    private WeatherAdapter adapter;
+    private WeatherAdapter1 adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +55,8 @@ public class CityActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         list_city.setLayoutManager(new LinearLayoutManager(this));
         list_city.setHasFixedSize(true);
-        adapter = new WeatherAdapter(this);
+        adapter = new WeatherAdapter1(this);
+        adapter.setOnClickListener(this);
 
         cityService = Common.getAPI();
         if (!Connection.checkConnection(this)) {
@@ -109,6 +114,8 @@ public class CityActivity extends AppCompatActivity {
                         list_city.setVisibility(View.VISIBLE);
                         adapter.addList(mainWeather.getList());
                         adapter.notifyDataSetChanged();
+                       /* WeatherAdapter1 adapter1=new WeatherAdapter1(getApplicationContext(),mainWeather.getList());
+                        adapter1.setOnClickListener(CityActivity.this);*/
                         list_city.setAdapter(adapter);
 
                     }
@@ -141,5 +148,27 @@ public class CityActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Toast.makeText(getApplicationContext(),"Position: "+position+" is Clicked",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onClick(ConditionList list) {
+        Bundle bundle=new Bundle();
+        bundle.putString("humiditiy",String.valueOf(list.getCurrentLocation().getHumidity()));
+        bundle.putString("pressure",String.valueOf(list.getCurrentLocation().getPressure()));
+        bundle.putString("description",list.getWeather().get(0).getDescription());
+        bundle.putString("tempMin",String.valueOf(list.getCurrentLocation().getTempMin()));
+        bundle.putString("tempMax",String.valueOf(list.getCurrentLocation().getTempMax()));
+        bundle.putString("speed",String.valueOf(list.getWind().getSpeed()));
+        bundle.putString("deg",String.valueOf(list.getWind().getDeg()));
+        bundle.putString("time",list.getDateTime());
+        bundle.putString("Icon", "http://openweathermap.org/img/w/" +list.getWeather().get(0).getIcon() + ".png");
+        Intent intent=new Intent(getApplicationContext(), DetailActivity.class);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 }
